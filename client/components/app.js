@@ -8,6 +8,8 @@ import Header from './header';
 import Footer from './footer';
 import UserPage from './userpage';
 
+import { SignUp, LogIn } from './signin';
+
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -20,7 +22,9 @@ export default class App extends React.Component {
         <div id='content'>
           <Switch>
             <Route exact path='/' component={Landing} />
-            <Route exact path='/home' render={props => onEnter(props, Home)} />
+            <Route path='/home' render={props => onEnter(props, Home)} />
+            <Route path='/signup' render={props => onEnter(props, SignUp)} />
+            <Route path='/login' render={props => onEnter(props, LogIn)} />
             <Route path='/:userid' render={props => onEnter(props, UserPage)} />
           </Switch>
         </div>

@@ -1,0 +1,29 @@
+/* line 1, ../sass/userpage.scss */
+#user-page {
+  display: flex;
+  flex-flow: row wrap;
+}
+/* line 5, ../sass/userpage.scss */
+#user-page > * {
+  margin: 0.5em;
+}
+/* line 9, ../sass/userpage.scss */
+#user-page #video-comp {
+  flex-grow: 2;
+}
+/* line 11, ../sass/userpage.scss */
+#user-page #video-comp #video {
+  border: solid;
+  min-height: 350px;
+  width: 100%;
+}
+/* line 17, ../sass/userpage.scss */
+#user-page #video-comp #video-controls {
+  width: 100%;
+  border: solid;
+}
+/* line 23, ../sass/userpage.scss */
+#user-page #related {
+  width: 300px;
+  border: solid;
+}

@@ -34,9 +34,9 @@ export default class P2PConn extends React.Component {
   initRoomSocket(socket, streamingUser, user) {
     const self = this;
     const peers = this.peers;
+    const username = user ? user : streamingUser;
 
     socket.on('connect', () => {
-      const username = user ? user : streamingUser;
       if (username !== streamingUser) {
         socket.emit('peer', JSON.stringify({
           username,
@@ -45,8 +45,9 @@ export default class P2PConn extends React.Component {
       }
 
       socket.emit('user', JSON.stringify({ 
-        user: username,
-        streamingUser
+        username,
+        streamingUser,
+        userIsStreamer: username === streamingUser
       }));
     });
 
@@ -106,6 +107,7 @@ export default class P2PConn extends React.Component {
     socket.on('offer', _message => {
       const message = JSON.parse(_message);
       console.log("offer received: ", message);
+      self.connectedParentPeer = message.sendTo;
 
       // Create new RTCPeerConn
       const peer = new RTCPeerConnection();
@@ -147,5 +149,44 @@ export default class P2PConn extends React.Component {
         .then(() => { console.log('success setting remote description to broadcaster')})
         .catch(e => { console.log('error setting remote description to broadcaster : ', e)});
     });
+
+    socket.on('disconnected', _message => {
+      /*
+      ** A socket has disconnected. Check if the stream
+      ** has ended (ie: broadcaster disconnected). Check if the 
+      ** peer this socket is connected to has disconnected. 
+      */
+      const message = JSON.parse(_message);
+      if (message.streamEnd) {
+        console.log("Stream has ended...");
+        self.setState({
+          localStream: null,
+          stream: null
+        });
+
+        for (let conn in self.peers) {
+          self.peers[conn].close();
+        }
+
+        self.peers = {};
+        return;
+      }
+
+      // if disconnected socket is not the connected parent peer to this socket, do nothing
+      if (message.socketID !== self.connectedParentPeer) return;
+
+      // attempt to reconnect 
+      console.log("Lost connection to peer. Attempting to reestablish...");
+      peers[message.socketID].close();
+      delete peers[message.socketID];
+      // handle UI while client waits to connect to next available peer 
+      socket.emit('peer', JSON.stringify({
+        username,
+        streamingUser
+      }));
+
+    });
+
+
   }
 }

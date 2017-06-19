@@ -1,0 +1,28 @@
+#user-page {
+  display: flex;
+  flex-flow: row wrap;
+
+  & > * {
+    margin: 0.5em;
+  }
+
+  #video-comp {
+    flex-grow: 2;
+    #video {
+      border: solid;
+      min-height: 350px;
+      width: 100%;
+    }
+
+    #video-controls {
+      width: 100%;
+      border: solid;
+    }
+  } 
+
+  #related {
+    width: 300px;
+    border: solid;
+  }
+
+}

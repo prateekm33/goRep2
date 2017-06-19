@@ -62,7 +62,7 @@ export default class VideoComp extends P2PConn {
     return (
       <div id='video-comp'>
         <input ref={el => this.inputEl = el} onChange={this.setInput}/>
-        <video autoPlay src={this.state.localStream} id='video' />
+        <video autoPlay src={this.state.localStream} id='video'/>
         <VideoControls 
           startStream={this.startStream} 
           endStream={this.endStream}
@@ -78,7 +78,6 @@ function VideoControls(props) {
       <div id='video-controls'>
         <button onClick={props.startStream}>stream</button>
         <button onClick={props.endStream}>end</button>
-        <button onClick={props.joinStream}>Join</button>
       </div>
     )
 }

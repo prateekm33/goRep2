@@ -1,0 +1,30 @@
+/* Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
+
+@import "compass/reset";
+
+body {
+  margin: 0;
+  min-width: 400px;
+}
+
+button {
+  margin: 0.5em;
+  width: 100px;
+  outline: none;
+  background: white;
+  border-style: none;
+  font-weight: bold;
+  border-radius: 0.6em;
+  border: 1px solid black;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+  }
+}
+
+@import 'header';
+@import 'userpage';

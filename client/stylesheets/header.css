@@ -1,0 +1,23 @@
+/* line 1, ../sass/header.scss */
+#header {
+  display: flex;
+  max-width: 100%;
+  height: 40px;
+  padding: 0.2em;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  background: black;
+  font-weight: bolder;
+  font-size: 2em;
+  color: white;
+}
+/* line 13, ../sass/header.scss */
+#header #logo {
+  padding-top: 0.2em;
+  text-decoration: none;
+  color: white;
+}
+/* line 19, ../sass/header.scss */
+#header #auth-buttons {
+  display: flex;
+}
