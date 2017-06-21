@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const initMiddleWare = require('./initMiddleWare.js');
+const initMiddleWare = require('./initMiddleware.js');
 console.log('__dirname: ', __dirname);
 
 const PORT = 3000;
