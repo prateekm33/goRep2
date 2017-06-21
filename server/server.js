@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
 const initMiddleWare = require('./initMiddleware.js');
-console.log('__dirname: ', __dirname);
+console.log('__dirname: ', __dirname, process.env.PORT);
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 initMiddleWare(app);
 
