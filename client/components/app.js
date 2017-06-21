@@ -7,8 +7,8 @@ import Home from './home';
 import Header from './header';
 import Footer from './footer';
 import UserPage from './userpage';
-
 import { SignUp, LogIn } from './signin';
+import DNE from './DNE';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -21,11 +21,10 @@ export default class App extends React.Component {
         <Header />
         <div id='content'>
           <Switch>
-            <Route exact path='/' component={Landing} />
-            <Route path='/home' render={props => onEnter(props, Home)} />
+            <Route exact path='/' render={props => onEnter(props, UserPage)} />
             <Route path='/signup' render={props => onEnter(props, SignUp)} />
             <Route path='/login' render={props => onEnter(props, LogIn)} />
-            <Route path='/:userid' render={props => onEnter(props, UserPage)} />
+            <Route path='*' component={DNE} />
           </Switch>
         </div>
         <Footer />

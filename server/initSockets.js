@@ -1,4 +1,6 @@
 const socketIO = require('socket.io');
+const dbUtils = require('./dbUtils');
+// TODO -- scale this broadcasters database better...
 const broadcasters = {};
 const MAX_PEERS = 20;
 
@@ -13,36 +15,77 @@ function initBroadCasterRoom(io, socket) {
   socket.on('broadcast', (_message, fn) => {
     const message = JSON.parse(_message);
     console.log("Broadcaster id: ", socket.id, " | ", "Broadcaster name: ", message.streamingUser);
-    broadcasters[message.streamingUser] = new Peer(message.streamingUser, socket.id);
-    const room = io.of(`/streams/${message.streamingUser}`);
+    const room = io.of(`/streams/${message.roomName}`);
     room.on("connection", socket => {
-      initRoomSocketHandlers(socket, message.streamingUser, io, room);
+      initRoomSocketHandlers(socket, message.roomName, io, room);
     });
     fn('ready');
+
+    // const peerObj = new Peer(message.streamingUser, socket.id);
+    // dbUtils.addRoom(peerObj)
+    //   .then(() => {
+    //     const room = io.of(`/streams/${message.streamingUser}`);
+    //     room.on("connection", socket => {
+    //       initRoomSocketHandlers(socket, message.streamingUser, io, room);
+    //     });
+    //     fn('ready');
+    //   }).catch(err => {
+    //     console.log("Error creating new streamer in database: ", err);
+    //     fn('not ready');
+    //   });
+
+    // broadcasters[message.streamingUser] = peerObj;
+    // const room = io.of(`/streams/${message.streamingUser}`);
+    // room.on("connection", socket => {
+    //   initRoomSocketHandlers(socket, message.streamingUser, io, room);
+    // });
+    // fn('ready');
   });
 }
 
-function initRoomSocketHandlers(socket, streamingUser, io, room) {
+function initRoomSocketHandlers(socket, roomName, io, room) {
   socket.on('user', _message => {
     const message = JSON.parse(_message);
+
     if (message.userIsStreamer) {
-      console.log("Broadcaster room socket id: ", socket.id, " | Broadcaster name: ", message.username);
-      const peer = broadcasters[message.username];
-      peer.addRoomSocket(socket.id);
+      dbUtils.addRoom(message.roomName, new Peer(message.roomName, socket.id, message.password))
+        .then()
+        .catch(err => {
+          console.log("Error...", err);
+        });
     }
+
+    // if (message.userIsStreamer) {
+    //   console.log("Broadcaster room socket id: ", socket.id, " | Broadcaster name: ", message.username);
+      // const peer = broadcasters[message.username];
+      // peer.addRoomSocket(socket.id);
+    // }
   });
 
   socket.on('peer', _message => {
     const message = JSON.parse(_message);
-    const peer = broadcasters[message.streamingUser];
-    // add the current peer to the next available peer 
-    //    -- fn returns socket id for next available peer
-    const connectedPeer = peer.addPeer(message.username, socket.id);
-    console.log(`Peer ${message.username} at id [ ${socket.id} ] attempting to connect to [ ${message.streamingUser} ] at id [ ${connectedPeer} ]...`);
-    // let the connected socket know that it has a new peer
-    socket.broadcast.to(connectedPeer).emit('peer', JSON.stringify({
-      peer: socket.id
-    }));
+    dbUtils.findPeer(message.roomName)
+      .then(connectedPeer => {
+        const connectedPeerID = connectedPeer.getId();
+        console.log(`Peer at id [ ${socket.id} ] attempting to connect to peer at id [ ${connectedPeerID} ]...`);
+        // let the connected socket know that it has a new peer
+        socket.broadcast.to(connectedPeerID).emit('peer', JSON.stringify({
+          peer: socket.id
+        }));
+      })
+      .catch(err => {
+        console.log("Error finding room --- ", err);
+      });
+
+    // const peer = broadcasters[message.streamingUser];
+    // // add the current peer to the next available peer 
+    // //    -- fn returns socket id for next available peer
+    // const connectedPeer = peer.addPeer(message.username, socket.id);
+    // console.log(`Peer ${message.username} at id [ ${socket.id} ] attempting to connect to [ ${message.streamingUser} ] at id [ ${connectedPeer} ]...`);
+    // // let the connected socket know that it has a new peer
+    // socket.broadcast.to(connectedPeer).emit('peer', JSON.stringify({
+    //   peer: socket.id
+    // }));
   });
 
 
@@ -69,35 +112,72 @@ function initRoomSocketHandlers(socket, streamingUser, io, room) {
   });
 
   socket.on('closing', () => {
-    const peer = broadcasters[streamingUser];
-    peer.removePeer(socket.id);
-    socket.broadcast.emit('closing', JSON.stringify({
-      socketID: socket.id,
-      nextPeer: peer.findNextAvailablePeer()
-    }));
+    const peer = broadcasters[roomName];
+    dbUtils.findPeer(message.roomName)
+      .then(peer => {
+        peer.removePeer(socket.id);
+        socket.broadcast.emit('closing', JSON.stringify({
+          socketID: socket.id,
+          nextPeer: peer.findNextAvailablePeer()
+        })); 
+      })
+      .catch(err => {
+        console.log("Error finding peer.....", err);
+      })
+    // peer.removePeer(socket.id);
+    // socket.broadcast.emit('closing', JSON.stringify({
+    //   socketID: socket.id,
+    //   nextPeer: peer.findNextAvailablePeer()
+    // }));
   })
 
   socket.on('disconnect', () => {
-    const peer = broadcasters[streamingUser];
-    const streamEnd = peer ? peer.getId(1) === socket.id : true;
-    !streamEnd && peer && peer.removePeer(socket.id);
-    console.log(`Socket at id [ ${socket.id} ] disconnected...`);
-    room.emit('disconnected', JSON.stringify({
-      socketID: socket.id,
-      streamEnd
-    }));
+    console.log("socket disconnected");
+    dbUtils.findPeer(roomName)
+      .then(peer => {
+        const streamEnd = peer ? peer.getId() === socket.id : true;
+        !streamEnd && peer && peer.removePeer(socket.id);
+        console.log(`Socket at id [ ${socket.id} ] disconnected.... Stream ended? - ${streamEnd} `);
+        room.emit('disconnected', JSON.stringify({
+          socketID: socket.id,
+          streamEnd
+        }));
 
-    if (streamEnd) {
-      delete broadcasters[streamingUser];
+        if (streamEnd) {
+          dbUtils.removeRoom(roomName);
 
-      for (sockets in room.connected) {
-        room.connected[sockets].disconnect();
-      }
+          for (sockets in room.connected) {
+            room.connected[sockets].disconnect();
+          }
 
-      room.removeAllListeners(); // Remove all Listeners for the event emitter
-      // delete namespace from socket so it can be used again later
-      delete io.nsps[`/streams/${streamingUser}`];
-    }
+          room.removeAllListeners(); // Remove all Listeners for the event emitter
+          // delete namespace from socket so it can be used again later
+          delete io.nsps[`/streams/${roomName}`];
+        }
+      })
+      .catch(err => {
+        console.log("Error finding peer....==...", err);
+      })
+    // const peer = broadcasters[streamingUser];
+    // const streamEnd = peer ? peer.getId(1) === socket.id : true;
+    // !streamEnd && peer && peer.removePeer(socket.id);
+    // console.log(`Socket at id [ ${socket.id} ] disconnected...`);
+    // room.emit('disconnected', JSON.stringify({
+    //   socketID: socket.id,
+    //   streamEnd
+    // }));
+
+    // if (streamEnd) {
+    //   delete broadcasters[streamingUser];
+
+    //   for (sockets in room.connected) {
+    //     room.connected[sockets].disconnect();
+    //   }
+
+    //   room.removeAllListeners(); // Remove all Listeners for the event emitter
+    //   // delete namespace from socket so it can be used again later
+    //   delete io.nsps[`/streams/${streamingUser}`];
+    // }
 
   });
 }
@@ -116,7 +196,8 @@ class Peer {
   }
 
   getId(n) {
-    return n === 0 ? this.socketID : this.roomSocketID;
+    return this.socketID;
+    // return n === 0 ? this.socketID : this.roomSocketID;
   }
 
   addPeer(peerName, id) {
@@ -132,7 +213,8 @@ class Peer {
       this.peers[id] = newPeer;
       this.peersArray.push(newPeer);
       this.numPeers++;
-      return this.roomSocketID || this.socketID;
+      return this.socketID;
+      // return this.roomSocketID || this.socketID;
     }
   }
 

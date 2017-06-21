@@ -1,0 +1,38 @@
+/* line 1, ../sass/auth.scss */
+#log-in-form, #sign-up-form {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 50%;
+  margin: 0 auto;
+  margin-top: 100px;
+  background: #efde1d;
+  border: 2px solid;
+}
+/* line 10, ../sass/auth.scss */
+#log-in-form > *, #sign-up-form > * {
+  margin-top: 2em;
+}
+/* line 14, ../sass/auth.scss */
+#log-in-form #title, #sign-up-form #title {
+  align-self: center;
+  font-weight: bold;
+  font-size: 2em;
+  margin-top: 0;
+}
+/* line 21, ../sass/auth.scss */
+#log-in-form #submit, #sign-up-form #submit {
+  width: 50%;
+  align-self: center;
+  margin-top: 2em;
+  background: black;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+/* line 30, ../sass/auth.scss */
+#log-in-form #submit:hover, #sign-up-form #submit:hover {
+  cursor: pointer;
+  background: white;
+  color: black;
+  border: 2px solid;
+}

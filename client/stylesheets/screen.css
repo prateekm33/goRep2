@@ -78,16 +78,40 @@ button {
   margin: 0.5em;
   width: 100px;
   outline: none;
-  background: white;
+  background: #efde1d;
   border-style: none;
   font-weight: bold;
   border-radius: 0.6em;
-  border: 1px solid black;
+  border: 1px solid #fbff1b;
 }
 /* line 23, ../sass/screen.scss */
 button:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: black;
+  color: #efde1d;
   cursor: pointer;
+}
+/* line 29, ../sass/screen.scss */
+button.inactive:hover {
+  background: #efde1d;
+}
+
+/* line 34, ../sass/screen.scss */
+form {
+  flex-grow: 3;
+  padding: 1em;
+}
+/* line 37, ../sass/screen.scss */
+form input {
+  width: 95%;
+  height: 2.5em;
+  border-style: none;
+  border: 2px solid rgba(0, 0, 0, 0.5);
+  padding: 0.5em;
+}
+/* line 44, ../sass/screen.scss */
+form input:focus {
+  border: 2px solid;
+  outline: none;
 }
 
 /* line 1, ../sass/header.scss */
@@ -112,6 +136,14 @@ button:hover {
 /* line 19, ../sass/header.scss */
 #header #auth-buttons {
   display: flex;
+  align-items: center;
+}
+/* line 23, ../sass/header.scss */
+#header #auth-buttons a {
+  color: white;
+  text-decoration: none;
+  font-size: 20px;
+  margin-left: 10px;
 }
 
 /* line 1, ../sass/userpage.scss */
@@ -124,22 +156,131 @@ button:hover {
   margin: 0.5em;
 }
 /* line 9, ../sass/userpage.scss */
+#user-page #video-comp.active {
+  flex-grow: 0;
+}
+/* line 13, ../sass/userpage.scss */
 #user-page #video-comp {
   flex-grow: 2;
-}
-/* line 11, ../sass/userpage.scss */
-#user-page #video-comp #video {
-  border: solid;
-  min-height: 350px;
-  width: 100%;
+  position: relative;
 }
 /* line 17, ../sass/userpage.scss */
-#user-page #video-comp #video-controls {
+#user-page #video-comp #video {
+  border: solid;
+  max-height: 480px;
+  width: 100%;
+  background: black;
+}
+/* line 24, ../sass/userpage.scss */
+#user-page #video-comp #user-message {
+  position: absolute;
+  top: 25%;
+  background: white;
+  padding: 1em;
+  left: 25%;
+  min-height: 150px;
+  border: 4px solid #efde1d;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  font-weight: bold;
+}
+/* line 39, ../sass/userpage.scss */
+#user-page #video-comp #user-message-button {
+  align-self: center;
+  height: 40px;
+}
+/* line 44, ../sass/userpage.scss */
+#user-page #video-comp #user-controls {
   width: 100%;
   border: solid;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
 }
-/* line 23, ../sass/userpage.scss */
-#user-page #related {
+/* line 51, ../sass/userpage.scss */
+#user-page #video-comp #user-controls #video-controls {
+  padding: 0.8em;
+  display: flex;
+  flex-flow: row nowrap;
+}
+/* line 59, ../sass/userpage.scss */
+#user-page #chat {
   width: 300px;
   border: solid;
+  flex-grow: 1;
+  background: aliceblue;
+  display: flex;
+  flex-flow: column nowrap;
+}
+/* line 67, ../sass/userpage.scss */
+#user-page #chat #messages {
+  min-height: 80%;
+  border-bottom: 4px solid;
+  padding: 1em;
+  flex-grow: 2000;
+}
+/* line 74, ../sass/userpage.scss */
+#user-page #chat #signin-modal {
+  display: flex;
+  flex-flow: column nowrap;
+  min-height: 100px;
+  justify-content: space-between;
+  font-size: 1.5em;
+  font-weight: bold;
+  align-items: center;
+  border: 2px solid;
+  padding: 1.5em;
+  background: #efde1d;
+}
+/* line 86, ../sass/userpage.scss */
+#user-page #chat #signin-modal button {
+  height: 40px;
+  background: black;
+  color: #efde1d;
+}
+/* line 91, ../sass/userpage.scss */
+#user-page #chat #signin-modal button:hover {
+  background: white;
+  color: black;
+  border: 2px solid black;
+}
+
+/* line 1, ../sass/auth.scss */
+#log-in-form, #sign-up-form {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 50%;
+  margin: 0 auto;
+  margin-top: 100px;
+  background: #efde1d;
+  border: 2px solid;
+}
+/* line 10, ../sass/auth.scss */
+#log-in-form > *, #sign-up-form > * {
+  margin-top: 2em;
+}
+/* line 14, ../sass/auth.scss */
+#log-in-form #title, #sign-up-form #title {
+  align-self: center;
+  font-weight: bold;
+  font-size: 2em;
+  margin-top: 0;
+}
+/* line 21, ../sass/auth.scss */
+#log-in-form #submit, #sign-up-form #submit {
+  width: 50%;
+  align-self: center;
+  margin-top: 2em;
+  background: black;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+/* line 30, ../sass/auth.scss */
+#log-in-form #submit:hover, #sign-up-form #submit:hover {
+  cursor: pointer;
+  background: white;
+  color: black;
+  border: 2px solid;
 }

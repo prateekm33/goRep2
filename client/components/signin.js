@@ -30,13 +30,16 @@ export class AuthForm extends React.Component {
           id={`${this.authFormID}-form` || 'auth-container-form'}
           onSubmit={this.handleSubmit}
         >
+          <div id='title'>{
+            this.authFormID === 'sign-up' ? "Sign Up" : "Log In"
+          }</div>
           <input placeholder='Enter username' id='username' />
           <input placeholder='Enter password' id='pw' type='password'/>
           {
             this.authFormID === 'sign-up' && 
-            <input id="pw-confirm" type='password'/>
+            <input id="pw-confirm" type='password' placeholder="Confirm password"/>
           }
-          <input type='submit' />
+          <input id="submit" type='submit' />
         </form>
       </div>
     )

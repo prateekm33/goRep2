@@ -14,41 +14,55 @@ export default class P2PConn extends React.Component {
     this.initRoomSocket = this.initRoomSocket.bind(this);
   } 
 
-  sendStreamToServer(streamingUser, user) {
+  sendStreamToServer(roomName, user) {
     const socket = io('/streams/broadcast').connect();
-    this.initBroadcasterSocket(socket, streamingUser, user);
+    this.initBroadcasterSocket(socket, roomName, user);
   }
 
-  initBroadcasterSocket(socket, streamingUser, user) {
+  initBroadcasterSocket(socket, roomName, user) {
     socket.on('connect', () => {
-      socket.emit('broadcast', JSON.stringify({ streamingUser }), data => {
+      socket.emit('broadcast', JSON.stringify({ roomName }), data => {
           if (data !== 'ready') return;
-          const roomSocket = io(`/streams/${streamingUser}`).connect();
-          this.initRoomSocket(roomSocket, streamingUser, user);
+          this.socket = io(`/streams/${roomName}`).connect();
+          this.initRoomSocket(this.socket, roomName, user);
         });
     }, (e) => {
       console.log('error?', e)
     });
   }
 
-  initRoomSocket(socket, streamingUser, user) {
+  initRoomSocket(socket, roomName, user) {
+    this.setState({
+      streamStarted: true
+    });
     const self = this;
     const peers = this.peers;
-    const username = user ? user : streamingUser;
+    // const username = user ? user : streamingUser;
 
     socket.on('connect', () => {
-      if (username !== streamingUser) {
+      if (!this.state.streamer) {
         socket.emit('peer', JSON.stringify({
-          username,
-          streamingUser
+          roomName
         }));
       }
+      // if (username !== streamingUser) {
+      //   socket.emit('peer', JSON.stringify({
+      //     username,
+      //     streamingUser
+      //   }));
+      // }
 
       socket.emit('user', JSON.stringify({ 
-        username,
-        streamingUser,
-        userIsStreamer: username === streamingUser
+        roomName,
+        userIsStreamer: this.state.streamer, //username === streamingUser
+        password: this.streamPassword
       }));
+
+      // socket.emit('user', JSON.stringify({ 
+      //   username,
+      //   streamingUser,
+      //   userIsStreamer: username === streamingUser
+      // }));
     });
 
     socket.on('peer', _message => {
@@ -159,10 +173,7 @@ export default class P2PConn extends React.Component {
       const message = JSON.parse(_message);
       if (message.streamEnd) {
         console.log("Stream has ended...");
-        self.setState({
-          localStream: null,
-          stream: null
-        });
+        self.resetState();
 
         for (let conn in self.peers) {
           self.peers[conn].close();

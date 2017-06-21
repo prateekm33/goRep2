@@ -6,23 +6,95 @@
     margin: 0.5em;
   }
 
+  #video-comp.active {
+    flex-grow: 0;
+  }
+
   #video-comp {
     flex-grow: 2;
+    position: relative;
+
     #video {
       border: solid;
-      min-height: 350px;
+      max-height: 480px;
       width: 100%;
+      background: black;
     }
 
-    #video-controls {
+    #user-message {
+      position: absolute;
+      top: 25%;
+      background: white;
+      padding: 1em;
+      left: 25%;
+      min-height: 150px;
+      border: 4px solid #efde1d;
+      display: flex;
+      flex-flow: column nowrap;
+      justify-content: space-between;
+      font-weight: bold;
+    }
+    
+
+    #user-message-button {
+      align-self: center;
+      height: 40px;
+    }
+
+    #user-controls {
       width: 100%;
       border: solid;
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+
+      #video-controls {
+        padding: 0.8em;
+        display: flex;
+        flex-flow: row nowrap;
+      }
     }
   } 
 
-  #related {
+  #chat {
     width: 300px;
     border: solid;
+    flex-grow: 1;
+    background: aliceblue;
+    display: flex;
+    flex-flow: column nowrap;
+
+    #messages {
+      min-height: 80%;
+      border-bottom: 4px solid;
+      padding: 1em;
+      flex-grow: 2000;
+    }
+
+    #signin-modal {
+      display: flex;
+      flex-flow: column nowrap;
+      min-height: 100px;
+      justify-content: space-between;
+      font-size: 1.5em;
+      font-weight: bold;
+      align-items: center;
+      border: 2px solid;
+      padding: 1.5em;
+      background: #efde1d;
+
+      button {
+        height: 40px;
+        background: black;
+        color: #efde1d;
+
+        &:hover {
+          background: white;
+          color: black;
+          border: 2px solid black;
+        }
+      }
+    }
   }
 
 }

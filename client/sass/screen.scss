@@ -14,17 +14,41 @@ button {
   margin: 0.5em;
   width: 100px;
   outline: none;
-  background: white;
+  background: #efde1d;
   border-style: none;
   font-weight: bold;
   border-radius: 0.6em;
-  border: 1px solid black;
+  border: 1px solid #fbff1b;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.8);
+    background: black;
+    color: #efde1d;
     cursor: pointer;
+  }
+
+  &.inactive:hover {
+    background: #efde1d;
+  }
+}
+
+form {
+  flex-grow: 3;
+  padding: 1em;
+  input {
+    width: 95%;
+    height: 2.5em;
+    border-style: none;
+    border: 2px solid rgba(0,0,0,0.5);
+    padding: 0.5em;
+
+    &:focus {
+      border: 2px solid;  
+      outline: none;
+    }
   }
 }
 
 @import 'header';
 @import 'userpage';
+@import 'auth';
+

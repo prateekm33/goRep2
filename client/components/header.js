@@ -21,8 +21,8 @@ export default class Header extends React.Component {
 function SignInButtons(props) {
   return (
     <div id='auth-buttons'>
-      <Link to='/signup' id='sign-up'> Sign Up </Link> 
-      <Link to='/login' id='sign-in'> Sign In </Link>
+      <Link to='/signup' id='sign-up'><button>Sign Up </button></Link> 
+      <Link to='/login' id='sign-in'><button> Sign In </button></Link>
     </div>
   )
 }

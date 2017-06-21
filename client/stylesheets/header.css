@@ -20,4 +20,12 @@
 /* line 19, ../sass/header.scss */
 #header #auth-buttons {
   display: flex;
+  align-items: center;
+}
+/* line 23, ../sass/header.scss */
+#header #auth-buttons a {
+  color: white;
+  text-decoration: none;
+  font-size: 20px;
+  margin-left: 10px;
 }

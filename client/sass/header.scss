@@ -18,5 +18,13 @@
 
   #auth-buttons {
     display: flex;
+    align-items: center;
+
+     a {
+      color: white;
+      text-decoration: none;
+      font-size: 20px;
+      margin-left: 10px;
+     }
   }
 }
