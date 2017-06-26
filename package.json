@@ -37,6 +37,7 @@
     "react-router-redux": "^4.0.8",
     "redis": "^2.7.1",
     "redux": "^3.6.0",
+    "sequelize": "^4.2.0",
     "socket.io": "^2.0.3",
     "socket.io-client": "^2.0.3",
     "url": "^0.11.0",

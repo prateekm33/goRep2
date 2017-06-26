@@ -192,8 +192,7 @@ export default class P2PConn extends React.Component {
       delete peers[message.socketID];
       // handle UI while client waits to connect to next available peer 
       socket.emit('peer', JSON.stringify({
-        username,
-        streamingUser
+        roomName
       }));
 
     });

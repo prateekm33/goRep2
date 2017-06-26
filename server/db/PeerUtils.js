@@ -1,3 +1,20 @@
+const config = require('../config.json');
+const dbUtils = require('./dbUtils');
+const MAX_PEERS = 2;
+
+function makePeer({roomName, socketID, group, parentPeer}) {
+  return {
+    roomName : roomName,
+    socketID : socketID,
+    MAX_PEERS : MAX_PEERS,
+    numPeers : 0,
+    peers : config.db === 'mongo' ? { 'blank': 'placeholder' } : {},
+    peersArray : [],
+    group: group || 0,
+    parentPeer
+  }
+}
+
 function removePeer(id, fromPeer) {
   const peers = [fromPeer];
   let peerIdx = 0;
@@ -32,11 +49,31 @@ function findNextAvailablePeer(peer) {
   return null;
 }
 
+function addPeer(roomName, id, toPeer) {
+  if (toPeer.numPeers >= toPeer.MAX_PEERS) {
+    const nextPeer = findNextAvailablePeer(toPeer);
+    if (!nextPeer) {
+      console.log("ERROR finding next available peer. Cannot connect to stream");
+      return; 
+    }
+    return addPeer(roomName, id, nextPeer);
+  } else {
+    const newPeer = makePeer(roomName, id);
+    const _toPeer = toPeer.get();
+    console.log('================= to\n peer: ', toPeer);
+    _toPeer.peers[id] = newPeer;
+    _toPeer.peersArray.push(newPeer);
+    _toPeer.numPeers++;
+    dbUtils.savePeer(toPeer, _toPeer);
+    return toPeer;
+  }
+}
 
 module.exports = {
   removePeer,
-  Peer,
-  findNextAvailablePeer
+  findNextAvailablePeer,
+  addPeer,
+  makePeer
 }
 
 
