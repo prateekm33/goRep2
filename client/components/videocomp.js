@@ -73,7 +73,7 @@ export default class VideoComp extends P2PConn {
     });
 
     navigator.mediaDevices.getUserMedia({
-      audio: false, video: { width: { max: 1280 }, height: { max: 720} }
+      audio: true, video: { width: { max: 1280 }, height: { max: 720} }
     })
       .then(this.gotStream)
       .catch(e => { 

@@ -1,5 +1,5 @@
 const streamsRouter = require('express').Router();
-const dbUtils = require('./dbUtils');
+const dbUtils = require('./db/dbUtils');
 
 streamsRouter.route('/:roomName')
   .get((req, res) => {
