@@ -167,11 +167,11 @@ const addRoom = (roomName, peer) => {
     }
 
     case 'sequelize': {
-      return Room.create({
+      return Peer.create({
         roomName, 
         peer: peer.socketID,
         group: 0
-      }).then(room => Peer.create(makePeer(peer)))
+      }).then(room => Room.create(makePeer(peer)))
     }    
   }
 }

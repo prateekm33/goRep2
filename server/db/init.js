@@ -12,7 +12,7 @@ switch (config.db) {
   case 'sequelize': {
     const Sequelize = require('sequelize');
     const sequelize = new Sequelize('quikstreams', 'qstream', 'secret', {
-      host: 'localhost',
+      host: process.env.NODE_ENV === 'prod' ? config.sequelize.hostname.prod : config.sequelize.hostname.dev,
       dialect: 'postgres',
       pool: {
         max: 5,
@@ -45,8 +45,8 @@ switch (config.db) {
     });
 
     module.exports.initDb = ({forceSync}) => {
-      return Room.sync({ force: forceSync })
-        .then(() => Peer.sync({ force: forceSync }))
+      return Peer.sync({ force: forceSync })
+        .then(() => Room.sync({ force: forceSync }))
         .then(models => sequelize.authenticate());
     }
 

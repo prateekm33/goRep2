@@ -1,3 +1,9 @@
 {
-  "db": "sequelize"
+  "db" : "sequelize",
+  "sequelize" : {
+    "hostname" : {
+      "prod" : "quikstreams.cfv4erute2oo.us-west-2.rds.amazonaws.com",
+      "dev" : "localhost"
+    } 
+  }
 }
