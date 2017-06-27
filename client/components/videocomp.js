@@ -45,6 +45,7 @@ export default class VideoComp extends P2PConn {
           console.log("Room exists...or there is an error: ");
           this.setState({
             renderMessage: true,
+            roomName,
             userMessage: `Room ${this.state.roomName} already exists. Do you want to join?`,
             userButtonText: "JOIN"
           });
@@ -88,7 +89,7 @@ export default class VideoComp extends P2PConn {
       stream
     });
 
-    this.MediaStream = stream.getTracks()[0];
+    this.MediaStream = stream.getTracks();
 
     this.sendStreamToServer(this.state.roomName, this.state.user);
   }
@@ -100,7 +101,7 @@ export default class VideoComp extends P2PConn {
       roomActive: false,
       streamer: false,
       streamStarted: false,
-      roomName: null,
+      roomName: "",
       renderMessage: '',
       userMessage: '',
       userButtonText: ''
@@ -116,7 +117,9 @@ export default class VideoComp extends P2PConn {
     }
     this.resetState();
 
-    this.MediaStream && this.MediaStream.stop();
+    if (this.MediaStream && this.MediaStream.length) {
+      this.MediaStream.forEach(stream => stream.stop());
+    }
   }
 
   joinStream() {
