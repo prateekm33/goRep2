@@ -21,7 +21,7 @@ const findInitiator = roomName => {
         .then(room => {
           return Peer.findById(room.peer)
             .then(_peer => {
-              console.log('found peer? ', _peer);
+              // console.log('found peer? ', _peer);
               return _peer
             });
           // return room ? room.peer : null
@@ -34,7 +34,7 @@ const findInitiator = roomName => {
         where: { roomName },
         attributes: ['peer']
       }).then(room => {
-        console.log("[findInitiator] Room???", room);
+        console.log("[findInitiator] Room???", room.peer);
         if (!room) { /* err */ return; }
         return Peer.findOne({
           where: { socketID : room.peer },
@@ -44,67 +44,58 @@ const findInitiator = roomName => {
   }
 }
 
-const addPeer = (roomName, newPeerID) => {
-  return findNextAvailable(roomName)
-    .then(peer => {
-      console.log("[addPeer] peer? ", peer);
-      if (!peer) { /* err */ return null; }
-      return Peer.findOne({
-        where: { socketID: newPeerID }
-      }).then(p => {
-        if (!p) {
-          return Peer.create(makePeer({
-            roomName,
-            socketID: newPeerID,
-            parentPeer: peer.socketID
-          }));
-        }
+const addPeer = (roomName, newPeerID, connectToPeer) => {
+  console.log("[addPeer] CONNECT TO PEER : ", connectToPeer);
 
-        return p.update({ parentPeer: peer.socketID })
-      }).then(saved => {
-        return peer.update({ numPeers: peer.numPeers + 1});
-      });
-    });
+  const promise = connectToPeer ? 
+    Peer.findOne({ where: { socketID: connectToPeer } }) : 
+    findNextAvailable(roomName);
 
-  // Room.findOne({
-  //   where: { roomName }
-  // }).then(room => {
-  //   return findNextAvailable(roomName, room.group)
-  //     .then(NAP => {
-  //       return NAP.update({ numPeers: NAP.numPeers + 1});
-  //     }).then(NAP => {
-  //       return Peer.create(makePeer({
-  //         roomName,
-  //         socketID: newPeerID,
-  //         group: NAP.group + 1
-  //       })).then(() => NAP);
-  //     })
-  // });
+  return promise.then(NAP => {
+    if (!NAP || NAP.numPeers >= MAX_PEERS) {
+      console.log('[addPeer error] NAP dne or numPeers high : ', NAP ? NAP.numPeers : null);
+      return null;
+    }
+
+    return Peer.findOne({
+      where: { socketID: newPeerID }
+    }).then(currPeer => {
+      if (!currPeer) {
+        return Peer.create(makePeer({
+          roomName,
+          socketID: newPeerID,
+          parentPeer: NAP.socketID
+        }));
+      }
+
+      return currPeer.update({ parentPeer: NAP.socketID });
+    }).then(currPeer => NAP.update({ numPeers: NAP.numPeers + 1 }));
+  }).catch(err => {
+    console.log("[addPeer error] error : ", err);
+    return err;
+  });
 
 
-  // return Room.findOne({
-  //   where: { roomName },
-  //   attributes: ['group']
-  // }).then(room => {
-  //   return Peer.findOne({
-  //     where: {
-  //       group: room.group,
-  //       numPeers: {
-  //         $lt: MAX_PEERS
-  //       }
-  //     }
-  //   });
-  // }).then(peer => {
-  //   return peer.update({
-  //     numPeers: peer.numPeers+1
-  //   });
-  // }).then(NAP => {
-  //   return Peer.create(makePeer({
-  //     roomName,
-  //     socketID: newPeerID,
-  //     group: NAP.group + 1
-  //   })).then(() => NAP);
-  // });
+  // return promise
+    // .then(peer => {
+    //   console.log("[addPeer] peer? ", peer.socketID);
+    //   if (!peer) { /* err */ return null; }
+    //   return Peer.findOne({
+    //     where: { socketID: newPeerID }
+    //   }).then(p => {
+    //     if (!p) {
+    //       return Peer.create(makePeer({
+    //         roomName,
+    //         socketID: newPeerID,
+    //         parentPeer: peer.socketID
+    //       }));
+    //     }
+
+    //     return p.update({ parentPeer: peer.socketID })
+    //   }).then(saved => {
+    //     return peer.update({ numPeers: peer.numPeers + 1});
+    //   });
+    // });
 }
 
 const findNextAvailable = (roomName) => {
@@ -116,31 +107,6 @@ const findNextAvailable = (roomName) => {
       }
     }
   }).then(peer => peer);
-
-
-  // return Peer.findOne({
-  //   where: { 
-  //     numPeers: {
-  //       $lt : MAX_PEERS
-  //     }
-  //   },
-  //   include: [
-  //     {
-  //       model: Room,
-  //       where: { 
-  //         roomName : Sequelize.col('peer.roomName'),
-  //         group : Sequelize.col('peer.group')
-  //       }
-  //     }
-  //   ]
-  // }).then(peer => {
-  //   if (!peer) {
-  //     return Room.update({ group: group + 1}, { where: { roomName }})
-  //       .then(() => findNextAvailable(roomName, group + 1))
-  //   }
-  //   console.log("NAP: -----------------", peer);
-  //   return peer;
-  // });
 }
 
 const addRoom = (roomName, peer) => {
@@ -148,7 +114,6 @@ const addRoom = (roomName, peer) => {
   switch (config.db) {
     case 'mongo': {
       const newPeer = makePeer(peer);
-      console.log('------ new peer: ', newPeer);
 
       const savedPeer = new Peer(newPeer);
       return savedPeer.save().then(_peer => {
@@ -167,6 +132,7 @@ const addRoom = (roomName, peer) => {
     }
 
     case 'sequelize': {
+      console.log("[addRoom] adding room : ", roomName);
       return Peer.create(makePeer(peer)).then(room => Room.create({roomName, 
         peer: peer.socketID,
         group: 0
@@ -193,16 +159,37 @@ const removeRoom = roomName => {
 }
 
 const removePeer = socketID => {
-  return Peer.destroy({
+  // find this peer in db
+  return Peer.findOne({
     where: { socketID }
-  }).then(destroyedPeer => {
-    console.log("[removePeer] destroyedPeer ? ", destroyedPeer);
-    if (!destroyedPeer) return null;
-    console.log("UPDATING PARENT PEER TO DESTROYED PEER");
-    return Peer.findOne({
-      where: { socketID: destroyedPeer.parentPeer }
-    })
-  }).then(peer => peer ? peer.update({ numPeers: peer.numPeers - 1 }) : null)
+  }).then(peer => {
+    if (!peer) return null;
+    // destroy this peer
+    return peer.destroy().then(() => {
+      // find this peer's parent peer
+      return Peer.findOne({
+        where: { socketID: peer.parentPeer }
+      });
+    });
+    // update the parent peer's numPeers
+  }).then(parentPeer => parentPeer.update({
+    numPeers: parentPeer.numPeers - 1
+  })).then(updated => {
+    // find next available
+    console.log('--- updated roomName : ', updated.roomName)
+    return findNextAvailable(updated.roomName).then(NAP => NAP);
+  });
+
+  // return Peer.destroy({
+  //   where: { socketID }
+  // }).then(destroyedPeer => {
+  //   console.log("[removePeer] destroyedPeer ? ", destroyedPeer);
+  //   if (!destroyedPeer) return null;
+  //   console.log("UPDATING PARENT PEER TO DESTROYED PEER");
+  //   return Peer.findOne({
+  //     where: { socketID: destroyedPeer.parentPeer }
+  //   })
+  // }).then(peer => peer ? peer.update({ numPeers: peer.numPeers - 1 }) : null)
 }
 
 
@@ -212,11 +199,11 @@ const findRoom = roomName => {
       console.log("checking for room ", roomName);
       return Room.findOne({ roomName })
         .then(room => {
-          console.log("room found? ", room);
+          // console.log("room found? ", room);
           return room;
         })
         .catch(err => {
-          console.log('find room error: ', err);
+          // console.log('find room error: ', err);
         });
     }
 
@@ -226,7 +213,7 @@ const findRoom = roomName => {
       return Room.findOne({
         where: { roomName }
       }).then(room => {
-        console.log("[findRoom] room foun\d? ", room);
+        console.log("[findRoom] room found? ", !!room);
         return room;
       });
     }

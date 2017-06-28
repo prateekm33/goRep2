@@ -38,38 +38,22 @@ function initRoomSocketHandlers(socket, roomName, io, room) {
         }
       )
         .catch(err => {
-          console.log("Error...", err);
+          // console.log("Error...", err);
         });
     }
   });
 
   socket.on('peer', _message => {
     const message = JSON.parse(_message);
-    dbUtils.addPeer(message.roomName, socket.id)
-      .then(connectedPeer => {
-        console.log("Connected Peer: ", connectedPeer, connectedPeer.socketID);
-        socket.broadcast.to(connectedPeer.get('socketID')).emit('peer', JSON.stringify({
+    dbUtils.addPeer(message.roomName, socket.id, message.connectToPeer)
+      .then(NAP => {
+        console.log("Connected Peer: ", NAP.socketID, socket.id);
+        socket.broadcast.to(NAP.get('socketID')).emit('peer', JSON.stringify({
           peer: socket.id
         }));
       }).catch(err => {
         console.log("Error finding room or adding peer...", err);
       });
-
-
-    // dbUtils.findInitiator(message.roomName)
-    //   .then(mainPeer => {
-    //     console.log('--------------- main peer ', mainPeer.get);
-    //     const connectedPeer = addPeer(message.roomName, socket.id, mainPeer);
-    //     const connectedPeerID = connectedPeer.socketID; //connectedPeer.getId();
-    //     console.log(`Peer at id [ ${socket.id} ] attempting to connect to peer at id [ ${connectedPeerID} ]...`);
-    //     // let the connected socket know that it has a new peer
-    //     return socket.broadcast.to(connectedPeerID).emit('peer', JSON.stringify({
-    //       peer: socket.id
-    //     }));
-    //   })
-    //   .catch(err => {
-    //     console.log("Error finding room --- ", err);
-    //   });
   });
 
 
@@ -101,13 +85,11 @@ function initRoomSocketHandlers(socket, roomName, io, room) {
       .then(peer => {
         const streamEnd = peer ? peer.socketID === socket.id : true;
         console.log(`Socket at id [ ${socket.id} ] disconnected.... Stream ended? - ${streamEnd} `);
-        room.emit('disconnected', JSON.stringify({
-          socketID: socket.id,
-          streamEnd
-        }));
 
         const promise = streamEnd ? 
-          dbUtils.removeRoom(roomName) : dbUtils.removePeer(socket.id);
+          dbUtils.removeRoom(roomName).then(() => null) : 
+          dbUtils.removePeer(socket.id)
+            .then(nextPeer => nextPeer);
 
         if (streamEnd) {
           for (sockets in room.connected) {
@@ -118,7 +100,13 @@ function initRoomSocketHandlers(socket, roomName, io, room) {
           delete io.nsps[`/streams/${roomName}`];
         }
 
-        return promise;
+        return promise.then(nextPeer => {
+          room.emit('disconnected', JSON.stringify({
+            socketID: socket.id,
+            streamEnd,
+          }));
+            // nextPeer: nextPeer.socketID
+        });
       })
       .catch(err => {
         console.log("Error finding peer....==...", err);

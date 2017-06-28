@@ -9,7 +9,10 @@ streamsRouter.route('/:roomName')
         console.log("did we find a room?", !!room);
         res.json({ room: !!room })
       })
-      .catch(err => res.json({ err }));
+      .catch(err => {
+        console.log("----- find room error streamsRouter :", err);
+        res.json({ err })
+      });
   })
 
 streamsRouter.route('/auth/:roomName')
