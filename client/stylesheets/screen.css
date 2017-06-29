@@ -215,34 +215,68 @@ form input:focus {
   background: aliceblue;
   display: flex;
   flex-flow: column nowrap;
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
-/* line 70, ../sass/userpage.scss */
+/* line 73, ../sass/userpage.scss */
+#user-page #chat #overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.5);
+}
+/* line 79, ../sass/userpage.scss */
+#user-page #chat #overlay div {
+  width: 50%;
+  height: 25%;
+  background: white;
+  align-self: center;
+}
+/* line 87, ../sass/userpage.scss */
 #user-page #chat #messages {
   min-height: 60%;
   border-bottom: 4px solid;
   padding: 1em;
   flex-grow: 2000;
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
-/* line 77, ../sass/userpage.scss */
+/* line 96, ../sass/userpage.scss */
+#user-page #chat #messages #disabled {
+  width: 50%;
+  background: white;
+  position: absolute;
+  align-self: center;
+  padding: 2em;
+  text-align: center;
+  font-weight: bold;
+  min-height: 80px;
+  display: flex;
+  justify-content: center;
+}
+/* line 110, ../sass/userpage.scss */
 #user-page #chat #signin-modal {
   display: flex;
   flex-flow: column nowrap;
-  min-height: 100px;
+  height: 100px;
   justify-content: space-between;
   font-size: 1.5em;
   font-weight: bold;
-  align-items: center;
+  align-self: center;
   border: 2px solid;
   padding: 1.5em;
   background: #efde1d;
+  align-items: center;
 }
-/* line 89, ../sass/userpage.scss */
+/* line 123, ../sass/userpage.scss */
 #user-page #chat #signin-modal button {
   height: 40px;
   background: black;
   color: #efde1d;
 }
-/* line 94, ../sass/userpage.scss */
+/* line 128, ../sass/userpage.scss */
 #user-page #chat #signin-modal button:hover {
   background: white;
   color: black;

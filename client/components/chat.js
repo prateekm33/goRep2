@@ -16,7 +16,7 @@ export default class Chat extends React.Component {
     return (
       <div id='signin-modal'>
         <div> Sign in to chat </div>
-        <Link to='/login'><button>
+        <Link to='/login'><button disabled={true}>
           Sign in
         </button></Link>
       </div>
@@ -26,7 +26,14 @@ export default class Chat extends React.Component {
   render() {
     return (
       <div id='chat'>
+        <div id="overlay">
+        </div>
         <div id='messages'>
+          <div id='disabled'>
+            <div style={{"align-self": "center"}}>
+              Chat is currently disabled
+            </div>
+          </div>
           {
             this.state.messages.map((message, idx) => {
               return <Message message={message} key={message}/>

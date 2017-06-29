@@ -8,9 +8,9 @@
   },
 
   "dbCreds" : {
-      "db" : "db_name",
-      "un" : "username",
-      "pw" : "password"
+      "db" : "quikstreams",
+      "un" : "qstream",
+      "pw" : "secret"
   },
 
   "MAX_PEERS": 20

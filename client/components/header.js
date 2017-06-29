@@ -5,13 +5,16 @@ import { Link } from 'react-router-dom';
 export default class Header extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      showAuth: false
+    }
   }
 
   render() {
     return (
       <div id='header'>
         <Link id='logo' to={'/'}>GoRep</Link>
-        <SignInButtons />
+        { this.state.showAuth ? <SignInButtons /> : null }
       </div>
     )
   }
