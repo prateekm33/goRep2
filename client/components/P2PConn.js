@@ -3,6 +3,12 @@ import io from 'socket.io-client';
 // import components
 import VideoComp from './videocomp';
 
+const iceConfig = {
+  iceServers : [
+    { urls: ["stun:stun.l.google.com:19302"] }
+  ]
+}
+
 export default class P2PConn extends React.Component {
   constructor(props) {
     super(props);
@@ -146,7 +152,7 @@ export default class P2PConn extends React.Component {
 
 
 function createOffer (peers, message, socket, stream, peer) {
-  peer = peer || new RTCPeerConnection();
+  peer = peer || new RTCPeerConnection(iceConfig);
   if (peers[message.peer]) peers[message.peer].close();
   peers[message.peer] = this.children[message.peer] = peer;
 
@@ -183,7 +189,7 @@ function createAnswer (peers, message, socket, stream, peer) {
   if (peers[message.sendTo]) peers[message.sendTo].close();
 
   // Create new RTCPeerConn
-  peer = peer || new RTCPeerConnection();
+  peer = peer || new RTCPeerConnection(iceConfig);
   peers[message.sendTo] = this.parents[message.sendTo] = peer;
 
   peer.onaddstream = event => {

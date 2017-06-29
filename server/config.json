@@ -7,5 +7,5 @@
     } 
   },
 
-  "MAX_PEER": 20
+  "MAX_PEERS": 20
 }
