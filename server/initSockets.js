@@ -1,9 +1,6 @@
 const socketIO = require('socket.io');
 const dbUtils = require('./db/dbUtils');
 const { removePeer, findNextAvailablePeer, addPeer } = require('./db/PeerUtils');
-// TODO -- scale this broadcasters database better...
-const broadcasters = {};
-// const MAX_PEERS = 20;
 
 module.exports = server => {
   const io = socketIO.listen(server);
@@ -89,7 +86,10 @@ function initRoomSocketHandlers(socket, roomName, io, room) {
         const promise = streamEnd ? 
           dbUtils.removeRoom(roomName).then(() => null) : 
           dbUtils.removePeer(socket.id)
-            .then(nextPeer => nextPeer);
+            .then(({chosenPeer, parentPeer}) => ({
+              chosenPeer: chosenPeer && chosenPeer.socketID,
+              parentPeer: parentPeer && parentPeer.socketID
+            }));
 
         if (streamEnd) {
           for (sockets in room.connected) {
@@ -100,10 +100,12 @@ function initRoomSocketHandlers(socket, roomName, io, room) {
           delete io.nsps[`/streams/${roomName}`];
         }
 
-        return promise.then(nextPeer => {
+        return promise.then((selectedSockets) => {
           room.emit('disconnected', JSON.stringify({
             socketID: socket.id,
             streamEnd,
+            parentPeer: selectedSockets.parentPeer,
+            chosenPeer: selectedSockets.chosenPeer
           }));
             // nextPeer: nextPeer.socketID
         });
@@ -112,4 +114,16 @@ function initRoomSocketHandlers(socket, roomName, io, room) {
         console.log("Error finding peer....==...", err);
       });
   });
+
+
+
+  socket.on('change stream', (_message) => {
+    const message = JSON.parse(_message);
+    console.log("SERVER EMITTING CHANGE STREAM TO ", message.to);
+    socket.broadcast.to(message.to)
+      .emit("change stream", JSON.stringify({
+        from: message.from,
+        stream: message.stream
+      }));
+  })
 }

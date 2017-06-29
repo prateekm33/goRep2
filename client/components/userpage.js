@@ -10,7 +10,6 @@ export default class UserPage extends React.Component {
   }
 
   render() {
-    console.log(this.props)
     return (
       <div id='user-page'>
         <VideoComp streamingUser={this.props.match.params.userid}/>

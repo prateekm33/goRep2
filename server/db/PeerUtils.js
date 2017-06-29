@@ -1,6 +1,6 @@
 const config = require('../config.json');
 const dbUtils = require('./dbUtils');
-const MAX_PEERS = 2;
+const MAX_PEERS = config.MAX_PEERS;
 
 function makePeer({roomName, socketID, group, parentPeer}) {
   return {

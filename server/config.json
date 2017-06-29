@@ -5,5 +5,7 @@
       "prod" : "quikstreams.cfv4erute2oo.us-west-2.rds.amazonaws.com",
       "dev" : "localhost"
     } 
-  }
+  },
+
+  "MAX_PEER": 20
 }

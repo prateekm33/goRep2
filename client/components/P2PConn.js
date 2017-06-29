@@ -23,6 +23,7 @@ export default class P2PConn extends React.Component {
 
   initBroadcasterSocket(socket, roomName, user) {
     socket.on('connect', () => {
+      console.warn("socket id: ", socket.id);
       socket.emit('broadcast', JSON.stringify({ roomName }), data => {
           if (data !== 'ready') return;
           this.socket = io(`/streams/${roomName}`).connect();
@@ -117,15 +118,26 @@ export default class P2PConn extends React.Component {
 
       // attempt to reconnect 
       console.log("Lost connection to peer. Attempting to reestablish...");
+      socket.id === message.chosenPeer && console.log("Attempting to reestablish to ", message.parentPeer);
       peers[message.socketID].close();
       delete peers[message.socketID];
       // handle UI while client waits to connect to next available peer 
       socket.emit('peer', JSON.stringify({
         roomName,
-        connectToPeer: message.nextPeer,
+        connectToPeer: socket.id === message.chosenPeer ? message.parentPeer : null,
       }));
 
     });
+
+    socket.on('change stream', _message => {
+      const message = JSON.parse(_message);
+      console.warn("Need to change streams...");
+      const streamss = peers[message.from].getRemoteStreams();
+      const remoteStream = peers[message.from].getRemoteStreams()[0];
+      console.warn("Streams : ", remoteStream);
+      peers[message.from].removeStream(this.state.stream);
+      peers[message.from].addStream(remoteStream);
+    })
 
 
   }
@@ -133,8 +145,8 @@ export default class P2PConn extends React.Component {
 
 
 
-function createOffer (peers, message, socket, stream) {
-  const peer = new RTCPeerConnection();
+function createOffer (peers, message, socket, stream, peer) {
+  peer = peer || new RTCPeerConnection();
   if (peers[message.peer]) peers[message.peer].close();
   peers[message.peer] = this.children[message.peer] = peer;
 
@@ -167,11 +179,11 @@ function createOffer (peers, message, socket, stream) {
 }
 
 
-function createAnswer (peers, message, socket, stream) {
+function createAnswer (peers, message, socket, stream, peer) {
   if (peers[message.sendTo]) peers[message.sendTo].close();
 
   // Create new RTCPeerConn
-  const peer = new RTCPeerConnection();
+  peer = peer || new RTCPeerConnection();
   peers[message.sendTo] = this.parents[message.sendTo] = peer;
 
   peer.onaddstream = event => {
@@ -180,8 +192,7 @@ function createAnswer (peers, message, socket, stream) {
       stream: event.stream
     }, () => {
       for (let id in this.children) {
-        console.log(id)
-        // emit new offer to these sockets
+        // // emit new offer to these sockets
         createOffer.call(this, peers, { peer : id }, socket, this.state.stream);
       }
     });

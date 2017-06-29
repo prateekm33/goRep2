@@ -2,7 +2,7 @@ const broadcasters = {};
 const Sequelize = require('sequelize');
 const config = require('../config.json');
 const { makePeer } = require('./PeerUtils');
-const MAX_PEERS = 2;
+const MAX_PEERS = config.MAX_PEERS;
 // const pool = require('./init').pool;
 const { Room, Peer } = (() => {
   switch (config.db) {
@@ -34,7 +34,7 @@ const findInitiator = roomName => {
         where: { roomName },
         attributes: ['peer']
       }).then(room => {
-        console.log("[findInitiator] Room???", room.peer);
+        console.log("[findInitiator] Room???", !!room);
         if (!room) { /* err */ return; }
         return Peer.findOne({
           where: { socketID : room.peer },
@@ -169,16 +169,33 @@ const removePeer = socketID => {
       // find this peer's parent peer
       return Peer.findOne({
         where: { socketID: peer.parentPeer }
+      }).then(parentPeer => {
+        return parentPeer.update({
+          numPeers: parentPeer.numPeers - 1
+        });
       });
     });
     // update the parent peer's numPeers
-  }).then(parentPeer => parentPeer.update({
-    numPeers: parentPeer.numPeers - 1
-  })).then(updated => {
-    // find next available
-    console.log('--- updated roomName : ', updated.roomName)
-    return findNextAvailable(updated.roomName).then(NAP => NAP);
+  }).then(parentPeer => {
+    // TODO -- handle when there is no parent peer
+      // streamer is ending stream...
+    return Peer.findOne({
+      where : { parentPeer: socketID }
+    }).then(chosenPeer => ({
+      chosenPeer,
+      parentPeer
+    }));
   });
+
+  //   return parentPeer.update({
+  //     numPeers: parentPeer.numPeers - 1
+  //   })
+  // }).then(updated => {
+  //   // find next available
+  //   console.log('--- updated roomName : ', updated.roomName)
+
+  //   return findNextAvailable(updated.roomName, ).then(NAP => NAP);
+  // });
 
   // return Peer.destroy({
   //   where: { socketID }
