@@ -1,0 +1,17 @@
+{
+  "db" : "sequelize",
+  "sequelize" : {
+    "hostname" : {
+      "prod" : "production endpoint",
+      "dev" : "localhost"
+    }
+  },
+
+  "dbCreds" : {
+      "db" : "db_name",
+      "un" : "username",
+      "pw" : "password"
+  },
+
+  "MAX_PEERS": 20
+}

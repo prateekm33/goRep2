@@ -11,7 +11,7 @@ switch (config.db) {
 
   case 'sequelize': {
     const Sequelize = require('sequelize');
-    const sequelize = new Sequelize('quikstreams', 'qstream', 'secret', {
+    const sequelize = new Sequelize(config.dbCreds.db, config.dbCreds.un, config.dbCreds.pw, {
       host: process.env.NODE_ENV === 'prod' ? config.sequelize.hostname.prod : config.sequelize.hostname.dev,
       dialect: 'postgres',
       pool: {
