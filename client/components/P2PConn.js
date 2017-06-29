@@ -108,8 +108,10 @@ export default class P2PConn extends React.Component {
       */
       const message = JSON.parse(_message);
       if (message.streamEnd) {
-        console.log("Stream has ended...");
-        self.resetState();
+        self.setUserMessage({
+          message: 'Stream has ended',
+          buttonText: "OK"
+        }, () => self.resetState())
 
         for (let conn in self.peers) {
           self.peers[conn].close();
@@ -123,7 +125,11 @@ export default class P2PConn extends React.Component {
       if (message.socketID !== self.connectedParentPeer) return;
 
       // attempt to reconnect 
-      console.log("Lost connection to peer. Attempting to reestablish...");
+      self.setUserMessage({
+        message: "Lost connection to stream. Attempting to reestablish connection...",
+        buttonText: "OK"
+      });
+
       socket.id === message.chosenPeer && console.log("Attempting to reestablish to ", message.parentPeer);
       peers[message.socketID].close();
       delete peers[message.socketID];
@@ -195,7 +201,9 @@ function createAnswer (peers, message, socket, stream, peer) {
   peer.onaddstream = event => {
     this.setState({
       localStream: URL.createObjectURL(event.stream),
-      stream: event.stream
+      stream: event.stream,
+      userMessage: "",
+      renderMessage: false
     }, () => {
       for (let id in this.children) {
         // // emit new offer to these sockets

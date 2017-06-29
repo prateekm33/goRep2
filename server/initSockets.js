@@ -91,22 +91,21 @@ function initRoomSocketHandlers(socket, roomName, io, room) {
               parentPeer: parentPeer && parentPeer.socketID
             }));
 
-        if (streamEnd) {
-          for (sockets in room.connected) {
-            room.connected[sockets].disconnect();
-          }
-          room.removeAllListeners(); // Remove all Listeners for the event emitter
-          // delete namespace from socket so it can be used again later
-          delete io.nsps[`/streams/${roomName}`];
-        }
-
         return promise.then((selectedSockets) => {
           room.emit('disconnected', JSON.stringify({
             socketID: socket.id,
             streamEnd,
-            parentPeer: selectedSockets.parentPeer,
-            chosenPeer: selectedSockets.chosenPeer
+            parentPeer: selectedSockets && selectedSockets.parentPeer,
+            chosenPeer: selectedSockets && selectedSockets.chosenPeer
           }));
+          if (streamEnd) {
+            for (sockets in room.connected) {
+              room.connected[sockets].disconnect();
+            }
+            room.removeAllListeners(); // Remove all Listeners for the event emitter
+            // delete namespace from socket so it can be used again later
+            delete io.nsps[`/streams/${roomName}`];
+          }
             // nextPeer: nextPeer.socketID
         });
       })

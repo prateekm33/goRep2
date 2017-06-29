@@ -23,6 +23,14 @@ export default class VideoComp extends P2PConn {
     this.userMessageClick = this.userMessageClick.bind(this);
   }
 
+  setUserMessage({message, buttonText}) {
+    return this.setState({
+      userMessage : message,
+      renderMessage: true,
+      userButtonText: buttonText
+    });
+  }
+
   roomFormSubmit(evt) {
     evt.preventDefault();
   }
@@ -69,7 +77,7 @@ export default class VideoComp extends P2PConn {
   }
 
   startStream(evt) {
-    this.setState({
+    this.state.renderMessage && this.setState({
       renderMessage: false
     });
 
@@ -114,6 +122,7 @@ export default class VideoComp extends P2PConn {
     this.socket.close();
     for (let peer in this.peers) {
       this.peers[peer].close();
+      delete this.peers[peer];
     }
     this.resetState();
 
@@ -191,10 +200,14 @@ export default class VideoComp extends P2PConn {
   }
 
   userMessageClick(evt) {
+    const userButtonText = this.state.userButtonText.toLowerCase();
+    const userMessage = this.state.userMessage;
     this.setState({
-      renderMessage: false
+      renderMessage: false,
+      userMessage: "",
+      userButtonText: ""
     }, () => {
-      switch(this.state.userButtonText.toLowerCase()) {
+      switch(userButtonText) {
         case 'join':
           this.handleJoinClick(evt);
           break;
@@ -204,6 +217,12 @@ export default class VideoComp extends P2PConn {
         case 'stream':
           this.startStream(evt);
           break;
+        case 'ok': {
+          this.setState({
+            roomActive: userMessage.toLowerCase() === 'stream has ended' ? false : this.state.roomActive
+          });
+          break;
+        }
         default:
           break;
       }
@@ -217,7 +236,7 @@ export default class VideoComp extends P2PConn {
         {
           this.state.renderMessage && (
             <div id="user-message">
-              <div>{this.state.userMessage}</div>
+              <div style={{"text-align": "center"}}>{this.state.userMessage}</div>
               <button className="active" id="user-message-button" onClick={this.userMessageClick}>{this.state.userButtonText}</button>
             </div>
           )

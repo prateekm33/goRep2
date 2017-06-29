@@ -170,6 +170,7 @@ const removePeer = socketID => {
       return Peer.findOne({
         where: { socketID: peer.parentPeer }
       }).then(parentPeer => {
+        if (!parentPeer) return null;
         return parentPeer.update({
           numPeers: parentPeer.numPeers - 1
         });
@@ -177,6 +178,8 @@ const removePeer = socketID => {
     });
     // update the parent peer's numPeers
   }).then(parentPeer => {
+    if (!parentPeer) return null;
+    
     // TODO -- handle when there is no parent peer
       // streamer is ending stream...
     return Peer.findOne({
